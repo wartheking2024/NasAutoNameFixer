@@ -7,22 +7,27 @@ from tkinter import filedialog, messagebox, ttk
 def extract_episode(file_name):
     name = os.path.splitext(file_name)[0]
 
-    # ① 标准格式优先
     patterns = [
-        r"[Ee][Pp]?(\d{1,3})",      # E01 / EP01
-        r"第(\d{1,3})集",           # 第01集
-        r"\s(\d{1,3})$",           # ⭐中文常见：空格+数字在结尾
+        # S02E03 / S2E3
+        r"[Ss]\d{1,2}[Ee](\d{1,4})",
+
+        # E03 / EP03（独立单词）
+        r"\b[Ee][Pp]?(\d{1,4})\b",
+
+        # 第03集
+        r"第\s*(\d{1,4})\s*集",
+
+        # 被分隔符包围 .03. _03_ -03- 空格03空格
+        r"(?:^|[.\-_ ])(\d{1,4})(?=[.\-_ ]|$)",
+
+        # 文件名开头是数字
+        r"^\s*(\d{1,4})\b",
     ]
 
     for pattern in patterns:
         match = re.search(pattern, name)
         if match:
             return int(match.group(1))
-
-    # ② 兜底策略：取最后出现的数字
-    numbers = re.findall(r"\d{1,3}", name)
-    if numbers:
-        return int(numbers[-1])
 
     return None
 
